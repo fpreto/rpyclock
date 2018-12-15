@@ -8,7 +8,8 @@ import logging
 import RaspberryPi
 import threading
 import time
-from http.server import HTTPServer, SimpleHTTPRequestHandler, HTTPStatus
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http import HTTPStatus
 from urllib.parse import urlparse, parse_qs
 
 
@@ -32,6 +33,12 @@ class Config:
             return self.config.getint('DEFAULT', key)
         else:
             return int(self.default[key])
+
+    def getboolean(self, key):
+        if self.config.has_option('DEFAULT', key):
+            return self.config.getboolean('DEFAULT', key)
+        else:
+            return self.default[key].lower() in ['true', '1', 't', 'y', 'yes', 'on']
 
     def __getitem__(self, key):
         if key in self.config['DEFAULT']:

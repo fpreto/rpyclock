@@ -1,3 +1,4 @@
+
 """
 RaspberryPI Linux Hardware Interface
 
@@ -43,36 +44,36 @@ def check_package(package: str, refreshcache = False) -> str:
 
 
 def get_temperature():
-    return re.search(r'temp=([0-9]+[\.]*[0-9]+)\'C', readcmd('vcgencmd measure_temp')).group(1)
+    return float(re.search(r'temp=([0-9]+[\.]*[0-9]+)\'C', readcmd('vcgencmd measure_temp')).group(1))
 
 
 def get_voltage():
-    return re.search(r'volt=([0-9]+[\.]*[0-9]+)V', readcmd('vcgencmd measure_volts')).group(1)
+    return float(re.search(r'volt=([0-9]+[\.]*[0-9]+)V', readcmd('vcgencmd measure_volts')).group(1))
 
 
 def get_frequency():
-    return readcmd('vcgencmd measure_clock arm').split('=')[1]
+    return int(readcmd('vcgencmd measure_clock arm').split('=')[1])
 
 
 def get_totalmemory():
     with open('/proc/meminfo', 'r') as meminfo:
         total_line = list(filter(lambda s: s.startswith('MemTotal:'), meminfo))[0]
         total_value = re.findall(r'([0-9]+)\s', total_line)[0]
-        return total_value
+        return int(total_value)
 
 
 def get_freememory():
     with open('/proc/meminfo', 'r') as meminfo:
         total_line = list(filter(lambda s: s.startswith('MemFree:'), meminfo))[0]
         total_value = re.findall(r'([0-9]+)\s', total_line)[0]
-        return total_value
+        return int(total_value)
 
 
 def get_uptime():
     with open('/proc/uptime', 'r') as uptime:
-        return uptime.readline().split()[0]
+        return float(uptime.readline().split()[0])
 
 
 def get_loadavg(metric=2):
     with open('/proc/loadavg', 'r') as loadavg:
-        return loadavg.readline().split()[metric]
+        return float(loadavg.readline().split()[metric])

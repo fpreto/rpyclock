@@ -12,3 +12,19 @@ div#version {
     text-align: center;
     font-size: 75%;
 }
+
+.ui-progressbar {
+    position: relative;
+}
+
+.progress-label {
+    position: absolute;
+    left: 45%;
+    top: 4px;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+td:first-child {
+    width: 1px;
+    white-space: nowrap;
+}
