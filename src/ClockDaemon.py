@@ -10,12 +10,14 @@ from enum import Enum
 from RaspHTTP import Config
 from LedMatrix import LedMatrix
 from datetime import datetime
+from service import DaemonService
 
 
 #
 # Constants
 #
 VERSION = "0.0.1"
+PID_FILE = "/tmp/raspberryclock.pid"
 
 #
 # Default configs
@@ -88,13 +90,35 @@ class RaspberryClock(RaspHTTP.Daemon):
     def move_state_to(self, state):
         self.state = state
 
+
+class RaspberryClockServiceDaemon(DaemonService):
+    def run(self):
+        logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s')
+        logging.info("Raspberry Pi Clock Daemon %s", (VERSION))
+        config = RaspHTTP.Config("config.ini", DEFAULT_CONFIG)
+        clock = RaspberryClock(config)
+        clock.run()
+        sys.exit(0)
+
+
 #
 # Main function
 #
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s')
-    logging.info("Raspberry Pi Clock Daemon %s", (VERSION))
-    config = RaspHTTP.Config("config.ini", DEFAULT_CONFIG)
-    daemon = RaspberryClock(config)
-    daemon.run()
-    sys.exit(0)
+    daemon = RaspberryClockServiceDaemon(PID_FILE)
+    if len(sys.argv) == 2:
+        if 'start' == sys.argv[1]:
+            daemon.start()
+        elif 'stop' == sys.argv[1]:
+            daemon.stop()
+        elif 'restart' == sys.argv[1]:
+            daemon.restart()
+        elif 'run' == sys.argv[1]:
+            daemon.run()
+        else:
+            print("Unknown command")
+            sys.exit(2)
+        sys.exit(0)
+    else:
+        print("usage: %s start|stop|restart" % sys.argv[0])
+        sys.exit(2)
