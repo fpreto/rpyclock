@@ -65,15 +65,14 @@ class DaemonService:
         # Check for a pidfile to see if the daemon already runs
         try:
             with open(self.pidfile, 'r') as pf:
-
                 pid = int(pf.read().strip())
+                os.kill(pid, 0)
         except IOError:
             pid = None
 
         if pid:
-            message = "pidfile {0} already exist. " + \
-                      "Daemon already running?\n"
-            sys.stderr.write(message.format(self.pidfile))
+            message = "pidfile {0} already exist and process {1} is running.\n"
+            sys.stderr.write(message.format(self.pidfile, pid))
             sys.exit(1)
 
         # Start the daemon
@@ -87,12 +86,12 @@ class DaemonService:
         try:
             with open(self.pidfile, 'r') as pf:
                 pid = int(pf.read().strip())
+                os.kill(pid, 0)
         except IOError:
             pid = None
 
         if not pid:
-            message = "pidfile {0} does not exist. " + \
-                      "Daemon not running?\n"
+            message = "pidfile {0} does not exist or process is not running.\n"
             sys.stderr.write(message.format(self.pidfile))
             return  # not an error in a restart
 
