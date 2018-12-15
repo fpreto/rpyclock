@@ -8,6 +8,7 @@ import logging
 import RaspberryPi
 import threading
 import time
+import signal
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from http import HTTPStatus
 from urllib.parse import urlparse, parse_qs
@@ -121,6 +122,7 @@ class Daemon:
         self.http_server = HTTPServer(('', self.config.getint('server_port')), DaemonHTTPHandler)
         self.http_server.daemon = self
         self.http_server_thread = threading.Thread(target=self.http_server.serve_forever)
+        self.running = False
 
     def handle_api(self, api, query, post) -> str:
         logging.info("API Request handling. API:%s QUERY:%s POST:%s", api, query, post)
@@ -152,21 +154,29 @@ class Daemon:
         return result
 
     def run(self):
+        self.running = True
+        signal.signal(signal.SIGINT, self._stop_loop)
+        signal.signal(signal.SIGTERM, self._stop_loop)
         try:
             logging.info("Starting server at %s...", "%s:%s" % self.http_server.server_address)
             self.http_server_thread.start()
-            while True:
+            while self.running:
                 logging.debug("Recalculating...")
                 self.recalculate()
                 logging.debug("... finished recalculating")
                 time.sleep(self.recalc_interval)
         except KeyboardInterrupt:
-            logging.info("Shutting down server...")
-            self.http_server.shutdown()
+            self.running = False
 
+        logging.info("Shutting down server...")
+        self.http_server.shutdown()
         self.http_server_thread.join()
         logging.info("bye!")
 
     def recalculate(self):
         pass
+
+    def _stop_loop(self, signum, frame):
+        logging.info("Received kill signal")
+        self.running = False
 

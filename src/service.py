@@ -8,8 +8,9 @@ class DaemonService:
 
     Usage: subclass the daemon class and override the run() method."""
 
-    def __init__(self, pidfile):
+    def __init__(self, pidfile, pwd):
         self.pidfile = pidfile
+        self.pwd = pwd
 
     def daemonize(self):
         """Deamonize class. UNIX double fork mechanism."""
@@ -24,7 +25,7 @@ class DaemonService:
             sys.exit(1)
 
         # decouple from parent environment
-        os.chdir('/')
+        os.chdir(self.pwd)
         os.setsid()
         os.umask(0)
 

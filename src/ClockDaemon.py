@@ -4,13 +4,15 @@
 #
 import RaspHTTP
 import logging
+import logging.handlers
 import sys
-from time import sleep
+import os
 from enum import Enum
 from RaspHTTP import Config
 from LedMatrix import LedMatrix
 from datetime import datetime
 from service import DaemonService
+import signal
 
 
 #
@@ -18,6 +20,7 @@ from service import DaemonService
 #
 VERSION = "0.0.1"
 PID_FILE = "/tmp/raspberryclock.pid"
+LOG_FILENAME = "/tmp/raspberryclock.log"
 
 #
 # Default configs
@@ -45,7 +48,6 @@ class RaspberryClock(RaspHTTP.Daemon):
         self.ledmatrix = LedMatrix(config)
         self.prevtimestr = None;
 
-
     def api(self, api, params):
         if api == "version":
             return {
@@ -63,7 +65,6 @@ class RaspberryClock(RaspHTTP.Daemon):
 
         elif self.is_state(State.RUNNING):
             self.printtime()
-
 
     def printtime(self):
         timestr = ""
@@ -83,7 +84,6 @@ class RaspberryClock(RaspHTTP.Daemon):
             self.ledmatrix.display_centered_text(timestr)
             self.prevtimestr = timestr
 
-
     def is_state(self, state):
         return state == self.state
 
@@ -93,8 +93,11 @@ class RaspberryClock(RaspHTTP.Daemon):
 
 class RaspberryClockServiceDaemon(DaemonService):
     def run(self):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s')
+        log_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=10)
+        log_handler.doRollover()
+        logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s', handlers=[log_handler])
         logging.info("Raspberry Pi Clock Daemon %s", (VERSION))
+        logging.info("Running directory is %s", (os.getcwd()))
         config = RaspHTTP.Config("config.ini", DEFAULT_CONFIG)
         clock = RaspberryClock(config)
         clock.run()
@@ -105,7 +108,7 @@ class RaspberryClockServiceDaemon(DaemonService):
 # Main function
 #
 if __name__ == "__main__":
-    daemon = RaspberryClockServiceDaemon(PID_FILE)
+    daemon = RaspberryClockServiceDaemon(PID_FILE, os.getcwd())
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
             daemon.start()
