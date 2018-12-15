@@ -5,7 +5,7 @@
 import configparser
 import json
 import logging
-import RaspberryPi
+import raspberrypi
 import threading
 import time
 import signal
@@ -141,13 +141,13 @@ class Daemon:
         result = {}
 
         if api == "hardware":
-            result['temperature'] = RaspberryPi.get_temperature()
-            result['voltage'] = RaspberryPi.get_voltage()
-            result['frequency'] = RaspberryPi.get_frequency()
-            result['memory'] = RaspberryPi.get_totalmemory()
-            result['free'] = RaspberryPi.get_freememory()
-            result['uptime'] = RaspberryPi.get_uptime()
-            result['loadavg'] = RaspberryPi.get_loadavg()
+            result['temperature'] = raspberrypi.get_temperature()
+            result['voltage'] = raspberrypi.get_voltage()
+            result['frequency'] = raspberrypi.get_frequency()
+            result['memory'] = raspberrypi.get_totalmemory()
+            result['free'] = raspberrypi.get_freememory()
+            result['uptime'] = raspberrypi.get_uptime()
+            result['loadavg'] = raspberrypi.get_loadavg()
         else:
             return None
 

@@ -5,7 +5,7 @@ Controls the LED Matrix MAX7219.
 #
 # Imports
 #
-from RaspHTTP import Config
+from daemonhttp import Config
 from luma.led_matrix.device import max7219
 from luma.core.interface.serial import spi, noop
 from luma.core.legacy import text, textsize, show_message

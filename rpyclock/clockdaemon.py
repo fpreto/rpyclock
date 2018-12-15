@@ -2,14 +2,14 @@
 #
 # Imports
 #
-import RaspHTTP
+import daemonhttp
 import logging
 import logging.handlers
 import sys
 import os
 from enum import Enum
-from RaspHTTP import Config
-from LedMatrix import LedMatrix
+from daemonhttp import Config
+from ledmatrix import LedMatrix
 from datetime import datetime
 from service import DaemonService
 import signal
@@ -40,7 +40,7 @@ class State(Enum):
     RUNNING = 2
 
 
-class RaspberryClock(RaspHTTP.Daemon):
+class RaspberryClock(daemonhttp.Daemon):
     def __init__(self, config: Config) -> None:
         super().__init__(config)
         self.now = datetime.now()
@@ -98,7 +98,7 @@ class RaspberryClockServiceDaemon(DaemonService):
         logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s', handlers=[log_handler])
         logging.info("Raspberry Pi Clock Daemon %s", (VERSION))
         logging.info("Running directory is %s", (os.getcwd()))
-        config = RaspHTTP.Config("config.ini", DEFAULT_CONFIG)
+        config = daemonhttp.Config("config.ini", DEFAULT_CONFIG)
         clock = RaspberryClock(config)
         clock.run()
         sys.exit(0)
