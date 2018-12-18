@@ -24,10 +24,8 @@ class LedMatrix:
         # Set Initial contrast
         self.device.contrast(self.config.getint('led_intensity'))
 
-
     def display_scrolling_text(self, text):
         show_message(self.device, text, fill="white", font=self.font)
-
 
     def display_centered_text(self, output):
         with canvas(self.device) as draw:

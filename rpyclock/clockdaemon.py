@@ -3,7 +3,6 @@
 # Imports
 #
 import daemonhttp
-import logging
 import logging.handlers
 import sys
 import os
@@ -11,8 +10,6 @@ from enum import Enum
 from daemonhttp import Config
 from ledmatrix import LedMatrix
 from datetime import datetime
-from service import DaemonService
-import signal
 
 
 #
@@ -91,37 +88,16 @@ class RaspberryClock(daemonhttp.Daemon):
         self.state = state
 
 
-class RaspberryClockServiceDaemon(DaemonService):
-    def run(self):
-        log_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=10)
-        log_handler.doRollover()
-        logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s', handlers=[log_handler])
-        logging.info("Raspberry Pi Clock Daemon %s", (VERSION))
-        logging.info("Running directory is %s", (os.getcwd()))
-        config = daemonhttp.Config("config.ini", DEFAULT_CONFIG)
-        clock = RaspberryClock(config)
-        clock.run()
-        sys.exit(0)
-
-
 #
 # Main function
 #
 if __name__ == "__main__":
-    daemon = RaspberryClockServiceDaemon(PID_FILE, os.getcwd())
-    if len(sys.argv) == 2:
-        if 'start' == sys.argv[1]:
-            daemon.start()
-        elif 'stop' == sys.argv[1]:
-            daemon.stop()
-        elif 'restart' == sys.argv[1]:
-            daemon.restart()
-        elif 'run' == sys.argv[1]:
-            daemon.run()
-        else:
-            print("Unknown command")
-            sys.exit(2)
-        sys.exit(0)
-    else:
-        print("usage: %s start|stop|restart" % sys.argv[0])
-        sys.exit(2)
+    log_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, backupCount=10)
+    log_handler.doRollover()
+    logging.basicConfig(level=logging.INFO, format='%(asctime)-15s %(levelname)s - %(message)s', handlers=[log_handler])
+    logging.info("Raspberry Pi Clock Daemon %s", (VERSION))
+    logging.info("Running directory is %s", (os.getcwd()))
+    config = daemonhttp.Config("config.ini", DEFAULT_CONFIG)
+    clock = RaspberryClock(config)
+    clock.run()
+    sys.exit(0)
